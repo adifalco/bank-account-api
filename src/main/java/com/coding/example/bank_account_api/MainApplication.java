@@ -19,8 +19,7 @@ public class MainApplication {
     }
 
     @Bean
-    public Docket docket()
-    {
+    public Docket docket() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
                 .apis(RequestHandlerSelectors.basePackage(getClass().getPackage().getName()))
@@ -30,8 +29,7 @@ public class MainApplication {
     }
 
 
-    private ApiInfo generateApiInfo()
-    {
+    private ApiInfo generateApiInfo() {
         return new ApiInfo("Coding Example for a Rest API", "This service is to show up how I'd implement a Spring Boot based Rest API", "Version 1.0",
                 "urn:tos", "Andrés Di Falco", "Apache 2.0", "http://www.apache.org/licenses/LICENSE-2.0");
     }
