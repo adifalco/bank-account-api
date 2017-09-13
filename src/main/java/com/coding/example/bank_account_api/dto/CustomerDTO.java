@@ -1,14 +1,9 @@
 package com.coding.example.bank_account_api.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 public class CustomerDTO {
-
-    @JsonIgnore
-    private Long id;
 
     @NotNull
     @Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$")
@@ -34,21 +29,12 @@ public class CustomerDTO {
     }
 
 
-    public Long getId() {
-        return id;
-    }
-
-    private void setId(Long id) {
-        this.id = id;
-    }
-
     public static CustomerDTOBuilder newBuilder() {
         return new CustomerDTOBuilder();
     }
 
     public static class CustomerDTOBuilder {
 
-        private Long id;
         private String email;
         private String password;
 
@@ -62,15 +48,8 @@ public class CustomerDTO {
             return this;
         }
 
-        public CustomerDTOBuilder setId(Long id) {
-            this.id = id;
-            return this;
-        }
-
         public CustomerDTO build() {
-            CustomerDTO customerDTO = new CustomerDTO(email, password);
-            customerDTO.setId(id);
-            return customerDTO;
+            return new CustomerDTO(email, password);
         }
     }
 }

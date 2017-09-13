@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 public class DefaultCustomerService implements CustomerService {
 
     @Override
-    public Long create(CustomerDTO customerDTO) throws ConstraintViolationException{
-        throw new ConstraintViolationException("un mensaje");
+    public Long create(CustomerDTO customerDTO) throws ConstraintViolationException {
+        return null;
     }
 }
