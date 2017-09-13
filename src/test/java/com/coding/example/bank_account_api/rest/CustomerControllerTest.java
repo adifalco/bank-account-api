@@ -16,10 +16,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(CustomerController.class)
@@ -35,6 +34,8 @@ public class CustomerControllerTest {
     private static final String NO_SPECIAL_SYMBOL_PASSWORD = "1aPassword";
     private static final String TOO_LONG_PASSWORD = "1aPasswordThatIsTooLongToBeValid!";
 
+    private static final Long CUSTOMER_ID = 1L;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -46,11 +47,14 @@ public class CustomerControllerTest {
     @Test
     public void signUp_whenAllCorrect_returnsStatusCreated() throws Exception {
         CustomerDTO customerDTO = buildValidCustomerDTO();
+        when(customerServiceMock.create(argThat(new CustomerDTOMatcher(customerDTO)))).thenReturn(CUSTOMER_ID);
 
         this.mockMvc.perform(post("/api/v1/customer")
                 .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
                 .content(gson.toJson(customerDTO, CustomerDTO.class)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.customerId").value(CUSTOMER_ID));
 
         verify(customerServiceMock, times(1)).create(argThat(new CustomerDTOMatcher(customerDTO)));
     }

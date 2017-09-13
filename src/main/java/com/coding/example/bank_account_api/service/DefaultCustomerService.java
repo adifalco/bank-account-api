@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 public class DefaultCustomerService implements CustomerService {
 
     @Override
-    public void create(CustomerDTO customerDTO) {
-
+    public Long create(CustomerDTO customerDTO) {
+        return null;
     }
 }
