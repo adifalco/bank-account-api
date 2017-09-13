@@ -1,6 +1,7 @@
 package com.coding.example.bank_account_api.rest;
 
 import com.coding.example.bank_account_api.dto.CustomerDTO;
+import com.coding.example.bank_account_api.exceptions.ConstraintViolationException;
 import com.coding.example.bank_account_api.service.CustomerService;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -18,6 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -35,6 +37,7 @@ public class CustomerControllerTest {
     private static final String TOO_LONG_PASSWORD = "1aPasswordThatIsTooLongToBeValid!";
 
     private static final Long CUSTOMER_ID = 1L;
+    private static final String ERROR_MESSAGE = "An error message";
 
     @Autowired
     private MockMvc mockMvc;
@@ -129,6 +132,20 @@ public class CustomerControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(customerServiceMock, times(0)).create(any(CustomerDTO.class));
+    }
+
+    @Test
+    public void signUp_whenEmailAlreadyExists_returnsBadRequest() throws Exception {
+        CustomerDTO customerDTO = buildValidCustomerDTO();
+        when(customerServiceMock.create(argThat(new CustomerDTOMatcher(customerDTO)))).thenThrow(new ConstraintViolationException(ERROR_MESSAGE));
+
+        this.mockMvc.perform(post("/api/v1/customer")
+                .contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)
+                .content(gson.toJson(customerDTO, CustomerDTO.class)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        verify(customerServiceMock, times(1)).create(argThat(new CustomerDTOMatcher(customerDTO)));
     }
 
     private CustomerDTO buildValidCustomerDTO() {

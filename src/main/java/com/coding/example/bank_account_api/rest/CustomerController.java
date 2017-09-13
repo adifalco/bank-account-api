@@ -23,7 +23,7 @@ public class CustomerController {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(value = HttpStatus.CREATED)
-    public SignUpResponseDTO signUp(@Valid @RequestBody CustomerDTO customerDTO) {
+    public SignUpResponseDTO signUp(@Valid @RequestBody CustomerDTO customerDTO) throws Exception {
         Long customerId = customerService.create(customerDTO);
         return SignUpResponseDTO.newBuilder().setCustomerId(customerId).build();
     }
