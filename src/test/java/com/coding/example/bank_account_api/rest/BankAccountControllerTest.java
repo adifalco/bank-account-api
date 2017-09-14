@@ -133,6 +133,16 @@ public class BankAccountControllerTest {
 
     }
 
+    @Test
+    public void fundAccount_whenAccountNotFound_returnsBadRequest() throws Exception {
+        when(bankAccountServiceMock.fundAccount(ACCOUNT_NUMBER, TRANSACTION_AMOUNT)).thenThrow(new EntityNotFoundException(ERROR_MESSAGE));
+
+        this.mockMvc.perform(put("/api/v1/account/{accountNumber}/deposit", ACCOUNT_NUMBER).param("amount", TRANSACTION_AMOUNT.toString()))
+                .andExpect(status().isBadRequest());
+
+        verify(bankAccountServiceMock, times(1)).fundAccount(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
+
+    }
 
     @Test
     public void fundAccount_whenAmountIsZero_returnsBadRequest() throws Exception {
@@ -159,6 +169,17 @@ public class BankAccountControllerTest {
                 .andExpect(jsonPath("$.balance").value(BALANCE))
                 .andExpect(jsonPath("$.date").value(DATE_STRING_UTC));
 
+
+        verify(bankAccountServiceMock, times(1)).withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
+
+    }
+
+    @Test
+    public void withdraw_whenAccountNotFound_returnsBadRequest() throws Exception {
+        when(bankAccountServiceMock.withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT)).thenThrow(new EntityNotFoundException(ERROR_MESSAGE));
+
+        this.mockMvc.perform(put("/api/v1/account/{accountNumber}/withdraw", ACCOUNT_NUMBER).param("amount", TRANSACTION_AMOUNT.toString()))
+                .andExpect(status().isBadRequest());
 
         verify(bankAccountServiceMock, times(1)).withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
 
