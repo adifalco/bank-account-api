@@ -1,8 +1,11 @@
 package com.coding.example.bank_account_api.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomerDTO {
 
     @NotNull

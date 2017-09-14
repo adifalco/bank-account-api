@@ -28,4 +28,9 @@ public class CustomerController {
         return SignUpResponseDTO.newBuilder().setCustomerId(customerId).build();
     }
 
+    @GetMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public CustomerDTO findByEmail(@RequestParam String email) throws Exception {
+        return customerService.findByEmail(email);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.coding.example.bank_account_api.rest;
 
 import com.coding.example.bank_account_api.dto.CustomerDTO;
 import com.coding.example.bank_account_api.exceptions.ConstraintViolationException;
+import com.coding.example.bank_account_api.exceptions.EntityNotFoundException;
 import com.coding.example.bank_account_api.service.CustomerService;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -148,6 +150,31 @@ public class CustomerControllerTest {
                 .andExpect(status().isBadRequest());
 
         verify(customerServiceMock, times(1)).create(argThat(new CustomerDTOMatcher(customerDTO)));
+    }
+
+    @Test
+    public void findByEmail_whenFound_returnsCustomerDTO() throws Exception {
+        CustomerDTO customerDTO = buildValidCustomerDTO();
+        when(customerServiceMock.findByEmail(EMAIL)).thenReturn(customerDTO);
+
+        this.mockMvc.perform(get("/api/v1/customer").param("email", EMAIL))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.firstName").value(FIRST_NAME))
+                .andExpect(jsonPath("$.lastName").value(LAST_NAME))
+                .andExpect(jsonPath("$.email").value(EMAIL));
+
+        verify(customerServiceMock, times(1)).findByEmail(EMAIL);
+    }
+
+    @Test
+    public void findByEmail_whenNotFound_returnsBadRequest() throws Exception {
+        when(customerServiceMock.findByEmail(EMAIL)).thenThrow(new EntityNotFoundException(ERROR_MESSAGE));
+
+        this.mockMvc.perform(get("/api/v1/customer").param("email", EMAIL))
+                .andExpect(status().isBadRequest());
+
+        verify(customerServiceMock, times(1)).findByEmail(EMAIL);
     }
 
     private CustomerDTO buildValidCustomerDTO() {
