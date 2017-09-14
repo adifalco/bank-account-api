@@ -31,10 +31,16 @@ public class BankAccountController {
         return bankAccountService.create(newAccountRequestDTO);
     }
 
-    @PutMapping(path = "/deposit/{accountNumber}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PutMapping(path = "/{accountNumber}/deposit", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public TransactionDTO fundAccount(@PathVariable Integer accountNumber, @RequestParam Double amount) throws Exception {
         Preconditions.checkArgument(amount > 0, "Invalid amount");
         return bankAccountService.fundAccount(accountNumber, amount);
+    }
+
+    @PutMapping(path = "/{accountNumber}/withdraw", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public TransactionDTO withdraw(@PathVariable Integer accountNumber, @RequestParam Double amount) throws Exception {
+        Preconditions.checkArgument(amount > 0, "Invalid amount");
+        return bankAccountService.withdraw(accountNumber, amount);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

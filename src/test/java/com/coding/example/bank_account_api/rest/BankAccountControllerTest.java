@@ -6,6 +6,7 @@ import com.coding.example.bank_account_api.dto.BankAccountDTO;
 import com.coding.example.bank_account_api.dto.NewAccountRequestDTO;
 import com.coding.example.bank_account_api.dto.TransactionDTO;
 import com.coding.example.bank_account_api.exceptions.EntityNotFoundException;
+import com.coding.example.bank_account_api.exceptions.NotEnoughFundsException;
 import com.coding.example.bank_account_api.service.BankAccountService;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -37,9 +38,10 @@ public class BankAccountControllerTest {
     private static final AccountType CURRENT_ACCOUNT = AccountType.CURRENT_ACCOUNT;
     private static final Double ZERO_BALANCE = 0.00d;
     private static final Double BALANCE = 850.25d;
-    private static final Double DEPOSIT_AMOUNT = 100.00d;
+    private static final Double TRANSACTION_AMOUNT = 100.00d;
     private static final Double ZERO_AMOUNT = 0.00d;
     private static final TransactionType TRANSACTION_DEPOSIT = TransactionType.DEPOSIT;
+    private static final TransactionType TRANSACTION_WITHDRAWAL = TransactionType.WITHDRAWAL;
 
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String DATE_STRING_CEST = "2017-09-14T11:45:01+0200";
@@ -114,27 +116,28 @@ public class BankAccountControllerTest {
 
     @Test
     public void fundAccount_whenAllCorrect_returnsTransactionInformation() throws Exception {
-        TransactionDTO transactionDTO = buildTransactionDTO();
-        when(bankAccountServiceMock.fundAccount(ACCOUNT_NUMBER, DEPOSIT_AMOUNT)).thenReturn(transactionDTO);
+        TransactionDTO transactionDTO = buildTransactionDTO(TRANSACTION_DEPOSIT);
+        when(bankAccountServiceMock.fundAccount(ACCOUNT_NUMBER, TRANSACTION_AMOUNT)).thenReturn(transactionDTO);
 
-        this.mockMvc.perform(put("/api/v1/account/deposit/" + ACCOUNT_NUMBER).param("amount", DEPOSIT_AMOUNT.toString()))
+        this.mockMvc.perform(put("/api/v1/account/{accountNumber}/deposit", ACCOUNT_NUMBER).param("amount", TRANSACTION_AMOUNT.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.accountNumber").value(ACCOUNT_NUMBER))
                 .andExpect(jsonPath("$.transactionType").value(TRANSACTION_DEPOSIT.name()))
-                .andExpect(jsonPath("$.amount").value(DEPOSIT_AMOUNT))
+                .andExpect(jsonPath("$.amount").value(TRANSACTION_AMOUNT))
                 .andExpect(jsonPath("$.balance").value(BALANCE))
                 .andExpect(jsonPath("$.date").value(DATE_STRING_UTC));
 
 
-        verify(bankAccountServiceMock, times(1)).fundAccount(ACCOUNT_NUMBER, DEPOSIT_AMOUNT);
+        verify(bankAccountServiceMock, times(1)).fundAccount(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
 
     }
+
 
     @Test
     public void fundAccount_whenAmountIsZero_returnsBadRequest() throws Exception {
 
-        this.mockMvc.perform(put("/api/v1/account/deposit/" + ACCOUNT_NUMBER).param("amount", ZERO_AMOUNT.toString()))
+        this.mockMvc.perform(put("/api/v1/account/{accountNumber}/deposit", ACCOUNT_NUMBER).param("amount", ZERO_AMOUNT.toString()))
                 .andExpect(status().isBadRequest());
 
 
@@ -142,11 +145,52 @@ public class BankAccountControllerTest {
 
     }
 
-    private TransactionDTO buildTransactionDTO() throws Exception {
+    @Test
+    public void withdraw_whenAllCorrect_returnsTransactionInformation() throws Exception {
+        TransactionDTO transactionDTO = buildTransactionDTO(TRANSACTION_WITHDRAWAL);
+        when(bankAccountServiceMock.withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT)).thenReturn(transactionDTO);
+
+        this.mockMvc.perform(put("/api/v1/account/{accountNumber}/withdraw", ACCOUNT_NUMBER).param("amount", TRANSACTION_AMOUNT.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.accountNumber").value(ACCOUNT_NUMBER))
+                .andExpect(jsonPath("$.transactionType").value(TRANSACTION_WITHDRAWAL.name()))
+                .andExpect(jsonPath("$.amount").value(TRANSACTION_AMOUNT))
+                .andExpect(jsonPath("$.balance").value(BALANCE))
+                .andExpect(jsonPath("$.date").value(DATE_STRING_UTC));
+
+
+        verify(bankAccountServiceMock, times(1)).withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
+
+    }
+
+    @Test
+    public void withdraw_whenNotEnoughFunds_returnsBadRequest() throws Exception {
+        when(bankAccountServiceMock.withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT)).thenThrow(new NotEnoughFundsException(ERROR_MESSAGE));
+
+        this.mockMvc.perform(put("/api/v1/account/{accountNumber}/withdraw", ACCOUNT_NUMBER).param("amount", TRANSACTION_AMOUNT.toString()))
+                .andExpect(status().isBadRequest());
+
+        verify(bankAccountServiceMock, times(1)).withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
+
+    }
+
+    @Test
+    public void withdraw_whenAmountIsZero_returnsBadRequest() throws Exception {
+
+        this.mockMvc.perform(put("/api/v1/account/{accountNumber}/withdraw", ACCOUNT_NUMBER).param("amount", ZERO_AMOUNT.toString()))
+                .andExpect(status().isBadRequest());
+
+
+        verify(bankAccountServiceMock, times(0)).withdraw(anyInt(), anyDouble());
+
+    }
+
+    private TransactionDTO buildTransactionDTO(TransactionType transactionType) throws Exception {
         return TransactionDTO.newBuilder()
                 .setAccountNumber(ACCOUNT_NUMBER)
-                .setTransactionType(TRANSACTION_DEPOSIT)
-                .setAmount(DEPOSIT_AMOUNT)
+                .setTransactionType(transactionType)
+                .setAmount(TRANSACTION_AMOUNT)
                 .setBalance(BALANCE)
                 .setDate(dateFormat.parse(DATE_STRING_CEST))
                 .build();
