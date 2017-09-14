@@ -1,8 +1,10 @@
 package com.coding.example.bank_account_api.rest;
 
 import com.coding.example.bank_account_api.domainvalue.AccountType;
+import com.coding.example.bank_account_api.domainvalue.TransactionType;
 import com.coding.example.bank_account_api.dto.BankAccountDTO;
 import com.coding.example.bank_account_api.dto.NewAccountRequestDTO;
+import com.coding.example.bank_account_api.dto.TransactionDTO;
 import com.coding.example.bank_account_api.exceptions.EntityNotFoundException;
 import com.coding.example.bank_account_api.service.BankAccountService;
 import com.google.gson.Gson;
@@ -17,9 +19,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -29,7 +35,17 @@ public class BankAccountControllerTest {
     private static final Long CUSTOMER_ID = 1L;
     private static final Integer ACCOUNT_NUMBER = 12345678;
     private static final AccountType CURRENT_ACCOUNT = AccountType.CURRENT_ACCOUNT;
-    private static final Double BALANCE = 0.00d;
+    private static final Double ZERO_BALANCE = 0.00d;
+    private static final Double BALANCE = 850.25d;
+    private static final Double DEPOSIT_AMOUNT = 100.00d;
+    private static final Double ZERO_AMOUNT = 0.00d;
+    private static final TransactionType TRANSACTION_DEPOSIT = TransactionType.DEPOSIT;
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
+    private static final String DATE_STRING_CEST = "2017-09-14T11:45:01+0200";
+    private static final String DATE_STRING_UTC = "2017-09-14T09:45:01+0000";
+
+    private DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
     private static final String ERROR_MESSAGE = "An error message";
 
@@ -54,7 +70,7 @@ public class BankAccountControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
                 .andExpect(jsonPath("$.accountNumber").value(ACCOUNT_NUMBER))
                 .andExpect(jsonPath("$.accountType").value(CURRENT_ACCOUNT.name()))
-                .andExpect(jsonPath("$.balance").value(BALANCE));
+                .andExpect(jsonPath("$.balance").value(ZERO_BALANCE));
 
         verify(bankAccountServiceMock, times(1)).create(argThat(new NewAccountRequestDTOMatcher(newAccountRequestDTO)));
     }
@@ -96,12 +112,52 @@ public class BankAccountControllerTest {
         verify(bankAccountServiceMock, times(1)).create(argThat(new NewAccountRequestDTOMatcher(newAccountRequestDTO)));
     }
 
+    @Test
+    public void fundAccount_whenAllCorrect_returnsTransactionInformation() throws Exception {
+        TransactionDTO transactionDTO = buildTransactionDTO();
+        when(bankAccountServiceMock.fundAccount(ACCOUNT_NUMBER, DEPOSIT_AMOUNT)).thenReturn(transactionDTO);
+
+        this.mockMvc.perform(put("/api/v1/account/deposit/" + ACCOUNT_NUMBER).param("amount", DEPOSIT_AMOUNT.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.accountNumber").value(ACCOUNT_NUMBER))
+                .andExpect(jsonPath("$.transactionType").value(TRANSACTION_DEPOSIT.name()))
+                .andExpect(jsonPath("$.amount").value(DEPOSIT_AMOUNT))
+                .andExpect(jsonPath("$.balance").value(BALANCE))
+                .andExpect(jsonPath("$.date").value(DATE_STRING_UTC));
+
+
+        verify(bankAccountServiceMock, times(1)).fundAccount(ACCOUNT_NUMBER, DEPOSIT_AMOUNT);
+
+    }
+
+    @Test
+    public void fundAccount_whenAmountIsZero_returnsBadRequest() throws Exception {
+
+        this.mockMvc.perform(put("/api/v1/account/deposit/" + ACCOUNT_NUMBER).param("amount", ZERO_AMOUNT.toString()))
+                .andExpect(status().isBadRequest());
+
+
+        verify(bankAccountServiceMock, times(0)).fundAccount(anyInt(), anyDouble());
+
+    }
+
+    private TransactionDTO buildTransactionDTO() throws Exception {
+        return TransactionDTO.newBuilder()
+                .setAccountNumber(ACCOUNT_NUMBER)
+                .setTransactionType(TRANSACTION_DEPOSIT)
+                .setAmount(DEPOSIT_AMOUNT)
+                .setBalance(BALANCE)
+                .setDate(dateFormat.parse(DATE_STRING_CEST))
+                .build();
+    }
+
     private BankAccountDTO buildBankAccountDTO() {
 
         return BankAccountDTO.newBuilder()
                 .setAccountNumber(ACCOUNT_NUMBER)
                 .setAccountType(CURRENT_ACCOUNT)
-                .setBalance(BALANCE).build();
+                .setBalance(ZERO_BALANCE).build();
     }
 
     private NewAccountRequestDTO buildNewAccountRequestDTO() {
