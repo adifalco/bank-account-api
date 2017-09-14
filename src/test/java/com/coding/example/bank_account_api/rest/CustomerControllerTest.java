@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(CustomerController.class)
 public class CustomerControllerTest {
 
+    private static final String FIRST_NAME = "aName";
+    private static final String LAST_NAME = "aLastName";
     private static final String EMAIL = "customer@mail.com";
     private static final String PASSWORD = "1Valid@password";
 
@@ -154,6 +156,8 @@ public class CustomerControllerTest {
 
     private CustomerDTO buildCustomerDTO(String email, String password) {
         CustomerDTO.CustomerDTOBuilder builder = CustomerDTO.newBuilder()
+                .setFirstName(FIRST_NAME)
+                .setLastName(LAST_NAME)
                 .setEmail(email)
                 .setPassword(password);
 

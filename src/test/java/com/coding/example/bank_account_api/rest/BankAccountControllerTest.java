@@ -4,6 +4,7 @@ import com.coding.example.bank_account_api.domainvalue.AccountType;
 import com.coding.example.bank_account_api.domainvalue.TransactionType;
 import com.coding.example.bank_account_api.dto.BankAccountDTO;
 import com.coding.example.bank_account_api.dto.NewAccountRequestDTO;
+import com.coding.example.bank_account_api.dto.StatementDTO;
 import com.coding.example.bank_account_api.dto.TransactionDTO;
 import com.coding.example.bank_account_api.exceptions.EntityNotFoundException;
 import com.coding.example.bank_account_api.exceptions.NotEnoughFundsException;
@@ -22,11 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -42,6 +43,8 @@ public class BankAccountControllerTest {
     private static final Double ZERO_AMOUNT = 0.00d;
     private static final TransactionType TRANSACTION_DEPOSIT = TransactionType.DEPOSIT;
     private static final TransactionType TRANSACTION_WITHDRAWAL = TransactionType.WITHDRAWAL;
+    private static final String FIRST_NAME = "aName";
+    private static final String LAST_NAME = "aLastName";
 
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String DATE_STRING_CEST = "2017-09-14T11:45:01+0200";
@@ -205,6 +208,48 @@ public class BankAccountControllerTest {
 
         verify(bankAccountServiceMock, times(0)).withdraw(anyInt(), anyDouble());
 
+    }
+
+    @Test
+    public void getStatement_returnsSuccessfulResponse() throws Exception {
+        StatementDTO statementDTO = buildStatementDTO();
+        when(bankAccountServiceMock.getStatement(ACCOUNT_NUMBER)).thenReturn(statementDTO);
+
+        this.mockMvc.perform(get("/api/v1/account/{accountNumber}/statement", ACCOUNT_NUMBER))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(jsonPath("$.firstName").value(FIRST_NAME))
+                .andExpect(jsonPath("$.lastName").value(LAST_NAME))
+                .andExpect(jsonPath("$.accountNumber").value(ACCOUNT_NUMBER))
+                .andExpect(jsonPath("$.date").value(DATE_STRING_UTC))
+                .andExpect(jsonPath("$.balance").value(BALANCE))
+                .andExpect(jsonPath("$.transactions[0].transactionType").value(TRANSACTION_DEPOSIT.name()))
+                .andExpect(jsonPath("$.transactions[0].amount").value(TRANSACTION_AMOUNT))
+                .andExpect(jsonPath("$.transactions[0].balance").value(BALANCE))
+                .andExpect(jsonPath("$.transactions[0].date").value(DATE_STRING_UTC));
+
+        verify(bankAccountServiceMock, times(1)).getStatement(ACCOUNT_NUMBER);
+    }
+
+    @Test
+    public void getStatement_whenAccountNotFound_returnsBadRequest() throws Exception {
+        when(bankAccountServiceMock.getStatement(ACCOUNT_NUMBER)).thenThrow(new EntityNotFoundException(ERROR_MESSAGE));
+
+        this.mockMvc.perform(get("/api/v1/account/{accountNumber}/statement", ACCOUNT_NUMBER))
+                .andExpect(status().isBadRequest());
+
+        verify(bankAccountServiceMock, times(1)).getStatement(ACCOUNT_NUMBER);
+    }
+
+    private StatementDTO buildStatementDTO() throws Exception {
+        return StatementDTO.newBuilder()
+                .setFirstName(FIRST_NAME)
+                .setLastName(LAST_NAME)
+                .setAccountNumber(ACCOUNT_NUMBER)
+                .setDate(dateFormat.parse(DATE_STRING_CEST))
+                .setBalance(BALANCE)
+                .setTransactions(Collections.singletonList(buildTransactionDTO(TRANSACTION_DEPOSIT)))
+                .build();
     }
 
     private TransactionDTO buildTransactionDTO(TransactionType transactionType) throws Exception {

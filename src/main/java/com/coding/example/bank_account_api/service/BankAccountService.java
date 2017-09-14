@@ -2,6 +2,7 @@ package com.coding.example.bank_account_api.service;
 
 import com.coding.example.bank_account_api.dto.BankAccountDTO;
 import com.coding.example.bank_account_api.dto.NewAccountRequestDTO;
+import com.coding.example.bank_account_api.dto.StatementDTO;
 import com.coding.example.bank_account_api.dto.TransactionDTO;
 import com.coding.example.bank_account_api.exceptions.EntityNotFoundException;
 import com.coding.example.bank_account_api.exceptions.NotEnoughFundsException;
@@ -13,4 +14,6 @@ public interface BankAccountService {
     TransactionDTO fundAccount(Integer accountNumber, Double amount) throws EntityNotFoundException;
 
     TransactionDTO withdraw(Integer accountNumber, Double amount) throws EntityNotFoundException, NotEnoughFundsException;
+
+    StatementDTO getStatement(Integer accountNumber) throws EntityNotFoundException;
 }

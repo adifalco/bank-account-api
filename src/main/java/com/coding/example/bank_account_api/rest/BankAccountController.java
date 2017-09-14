@@ -2,6 +2,7 @@ package com.coding.example.bank_account_api.rest;
 
 import com.coding.example.bank_account_api.dto.BankAccountDTO;
 import com.coding.example.bank_account_api.dto.NewAccountRequestDTO;
+import com.coding.example.bank_account_api.dto.StatementDTO;
 import com.coding.example.bank_account_api.dto.TransactionDTO;
 import com.coding.example.bank_account_api.service.BankAccountService;
 import com.google.common.base.Preconditions;
@@ -41,6 +42,11 @@ public class BankAccountController {
     public TransactionDTO withdraw(@PathVariable Integer accountNumber, @RequestParam Double amount) throws Exception {
         Preconditions.checkArgument(amount > 0, "Invalid amount");
         return bankAccountService.withdraw(accountNumber, amount);
+    }
+
+    @GetMapping(path = "/{accountNumber}/statement", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public StatementDTO getStatement(@PathVariable Integer accountNumber) throws Exception {
+        return bankAccountService.getStatement(accountNumber);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
