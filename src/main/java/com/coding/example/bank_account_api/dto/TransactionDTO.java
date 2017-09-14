@@ -2,9 +2,11 @@ package com.coding.example.bank_account_api.dto;
 
 import com.coding.example.bank_account_api.domainvalue.TransactionType;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Date;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class TransactionDTO {
 
     private Integer accountNumber;
