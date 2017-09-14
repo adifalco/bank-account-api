@@ -47,7 +47,7 @@ public class DefaultCustomerService implements CustomerService {
     public CustomerDTO findByEmail(String email) throws EntityNotFoundException {
         Customer customer = customerRepository.findByEmail(email);
         if (customer == null) {
-            String msg = String.format("Email %s not found", email);
+            String msg = String.format("No customer found with email: %s", email);
             LOG.warn(msg);
             throw new EntityNotFoundException(msg);
         }
