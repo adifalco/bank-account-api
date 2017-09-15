@@ -27,7 +27,7 @@ public class TransactionDTOBuilderTest {
         builder.setTransactionType(TRANSACTION_DEPOSIT);
         builder.setAmount(DEPOSIT_AMOUNT);
         builder.setBalance(BALANCE);
-        builder.setDate(DATE);
+        builder.setTransactionDate(DATE);
         TransactionDTO transactionDTO = builder.build();
 
         //Then
@@ -35,7 +35,7 @@ public class TransactionDTOBuilderTest {
         assertEquals(TRANSACTION_DEPOSIT, transactionDTO.getTransactionType());
         assertEquals(DEPOSIT_AMOUNT, transactionDTO.getAmount());
         assertEquals(BALANCE, transactionDTO.getBalance());
-        assertEquals(DATE, transactionDTO.getDate());
+        assertEquals(DATE, transactionDTO.getTransactionDate());
     }
 
 }

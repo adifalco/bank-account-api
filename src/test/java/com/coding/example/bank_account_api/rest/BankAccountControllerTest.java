@@ -129,7 +129,7 @@ public class BankAccountControllerTest {
                 .andExpect(jsonPath("$.transactionType").value(TRANSACTION_DEPOSIT.name()))
                 .andExpect(jsonPath("$.amount").value(TRANSACTION_AMOUNT))
                 .andExpect(jsonPath("$.balance").value(BALANCE))
-                .andExpect(jsonPath("$.date").value(DATE_STRING_UTC));
+                .andExpect(jsonPath("$.transactionDate").value(DATE_STRING_UTC));
 
 
         verify(bankAccountServiceMock, times(1)).fundAccount(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
@@ -170,7 +170,7 @@ public class BankAccountControllerTest {
                 .andExpect(jsonPath("$.transactionType").value(TRANSACTION_WITHDRAWAL.name()))
                 .andExpect(jsonPath("$.amount").value(TRANSACTION_AMOUNT))
                 .andExpect(jsonPath("$.balance").value(BALANCE))
-                .andExpect(jsonPath("$.date").value(DATE_STRING_UTC));
+                .andExpect(jsonPath("$.transactionDate").value(DATE_STRING_UTC));
 
 
         verify(bankAccountServiceMock, times(1)).withdraw(ACCOUNT_NUMBER, TRANSACTION_AMOUNT);
@@ -226,7 +226,7 @@ public class BankAccountControllerTest {
                 .andExpect(jsonPath("$.transactions[0].transactionType").value(TRANSACTION_DEPOSIT.name()))
                 .andExpect(jsonPath("$.transactions[0].amount").value(TRANSACTION_AMOUNT))
                 .andExpect(jsonPath("$.transactions[0].balance").value(BALANCE))
-                .andExpect(jsonPath("$.transactions[0].date").value(DATE_STRING_UTC));
+                .andExpect(jsonPath("$.transactions[0].transactionDate").value(DATE_STRING_UTC));
 
         verify(bankAccountServiceMock, times(1)).getStatement(ACCOUNT_NUMBER);
     }
@@ -258,7 +258,7 @@ public class BankAccountControllerTest {
                 .setTransactionType(transactionType)
                 .setAmount(TRANSACTION_AMOUNT)
                 .setBalance(BALANCE)
-                .setDate(dateFormat.parse(DATE_STRING_CEST))
+                .setTransactionDate(dateFormat.parse(DATE_STRING_CEST))
                 .build();
     }
 

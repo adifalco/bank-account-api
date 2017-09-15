@@ -12,17 +12,17 @@ public class TransactionDTO {
     private Integer accountNumber;
     private TransactionType transactionType;
     private Double amount;
-    private Date date;
+    private Date transactionDate;
     private Double balance;
 
     private TransactionDTO() {
     }
 
-    private TransactionDTO(Integer accountNumber, TransactionType transactionType, Double amount, Date date, Double balance) {
+    private TransactionDTO(Integer accountNumber, TransactionType transactionType, Double amount, Date transactionDate, Double balance) {
         this.accountNumber = accountNumber;
         this.transactionType = transactionType;
         this.amount = amount;
-        this.date = date;
+        this.transactionDate = transactionDate;
         this.balance = balance;
     }
 
@@ -39,8 +39,8 @@ public class TransactionDTO {
     }
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssZ", timezone = "UTC")
-    public Date getDate() {
-        return date;
+    public Date getTransactionDate() {
+        return transactionDate;
     }
 
     public Double getBalance() {
@@ -56,7 +56,7 @@ public class TransactionDTO {
         private Integer accountNumber;
         private TransactionType transactionType;
         private Double amount;
-        private Date date;
+        private Date transactionDate;
         private Double balance;
 
         public TransactionDTOBuilder setAccountNumber(Integer accountNumber) {
@@ -74,8 +74,8 @@ public class TransactionDTO {
             return this;
         }
 
-        public TransactionDTOBuilder setDate(Date date) {
-            this.date = date;
+        public TransactionDTOBuilder setTransactionDate(Date transactionDate) {
+            this.transactionDate = transactionDate;
             return this;
         }
 
@@ -85,7 +85,7 @@ public class TransactionDTO {
         }
 
         public TransactionDTO build() {
-            return new TransactionDTO(accountNumber, transactionType, amount, date, balance);
+            return new TransactionDTO(accountNumber, transactionType, amount, transactionDate, balance);
         }
     }
 }
