@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 
 @Service
-public class DefaultCustomerService implements CustomerService {
+public class DefaultCustomerService implements CustomerService, InternalCustomerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomerService.class);
 
@@ -52,5 +52,14 @@ public class DefaultCustomerService implements CustomerService {
             throw new EntityNotFoundException(msg);
         }
         return CustomerMapper.makeCustomerDTO(customer);
+    }
+
+    @Override
+    public Customer findCustomerChecked(Long id) throws EntityNotFoundException {
+        Customer customer = customerRepository.findOne(id);
+        if (customer == null) {
+            throw new EntityNotFoundException("Customer not found with id: " + id);
+        }
+        return customer;
     }
 }
