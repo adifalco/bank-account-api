@@ -4,7 +4,6 @@ import com.coding.example.bank_account_api.domain.BankAccount;
 import com.coding.example.bank_account_api.domain.BankTransaction;
 import com.coding.example.bank_account_api.domain.Customer;
 import com.coding.example.bank_account_api.domainvalue.AccountType;
-import com.coding.example.bank_account_api.domainvalue.TransactionType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,26 +62,6 @@ public class BankAccountRepositoryTest {
 
         //Then
         assertEquals(NEW_ACCOUNT_ID, bankAccount.getId());
-    }
-
-    @Test
-    @Transactional
-    public void addNewTransactionToAccount() {
-        //Given
-        BankAccount bankAccount = bankAccountRepository.findOne(ACCOUNT_ID);
-        BankTransaction newBankTransaction = new BankTransaction(TransactionType.DEPOSIT, AMOUNT);
-        bankAccount.addBankTransaction(newBankTransaction);
-
-        //When
-        bankAccount = bankAccountRepository.save(bankAccount);
-
-        //Then
-        List<BankTransaction> transactions = bankAccount.getTransactions();
-        BankTransaction bankTransaction1 = transactions.get(0);
-        BankTransaction bankTransaction2 = transactions.get(1);
-
-        assertEquals(new Long(TRANSACTION_ID), bankTransaction1.getId());
-        assertEquals(new Long(NEW_TRANSACTION_ID), bankTransaction2.getId());
     }
 
 }

@@ -53,7 +53,7 @@ public class DefaultBankAccountServiceTest {
         //Given
         NewAccountRequestDTO accountRequestDTO = buildNewAccountRequestDTO();
 
-        Customer customer = new Customer();
+        Customer customer = mock(Customer.class);
         when(customerService.findCustomerChecked(CUSTOMER_ID)).thenReturn(customer);
         BankAccount newBankAccount = buildBankAccount(customer);
 
@@ -75,9 +75,9 @@ public class DefaultBankAccountServiceTest {
     @Test
     public void fundAccount_whenAllCorrect_returnsTransactionDTO() throws Exception {
         //Given
-        BankAccount bankAccount = buildBankAccount(new Customer());
-        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT);
+        BankAccount bankAccount = buildBankAccount(mock(Customer.class));
         bankAccount.add(DEPOSIT_TRANSACTION_AMOUNT);
+        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT, bankAccount);
         bankAccount.addBankTransaction(transaction);
         when(bankAccountRepository.findByAccountNumber(ACCOUNT_NUMBER)).thenReturn(bankAccount);
 
@@ -97,9 +97,9 @@ public class DefaultBankAccountServiceTest {
     @Test
     public void withdraw_whenAllCorrect_returnsTransactionDTO() throws Exception {
         //Given
-        BankAccount bankAccount = buildBankAccount(new Customer());
-        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT);
+        BankAccount bankAccount = buildBankAccount(mock(Customer.class));
         bankAccount.add(DEPOSIT_TRANSACTION_AMOUNT);
+        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT, bankAccount);
         bankAccount.addBankTransaction(transaction);
         when(bankAccountRepository.findByAccountNumber(ACCOUNT_NUMBER)).thenReturn(bankAccount);
 

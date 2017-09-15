@@ -26,13 +26,7 @@ public class BankTransaction {
     private Date transactionDate;
 
 
-    public BankTransaction() {
-    }
-
-    public BankTransaction(TransactionType transactionType, Double amount) {
-        this.transactionType = transactionType;
-        this.amount = amount;
-        this.transactionDate = new Date();
+    BankTransaction() {
     }
 
     public BankTransaction(TransactionType transactionType, Double amount, BankAccount bankAccount) {

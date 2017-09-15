@@ -27,7 +27,7 @@ public class Customer {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreated;
 
-    public Customer() {
+    Customer() {
     }
 
     public Customer(String firstName, String lastName, String email, String password) {

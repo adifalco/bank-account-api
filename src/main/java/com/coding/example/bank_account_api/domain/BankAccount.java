@@ -31,7 +31,7 @@ public class BankAccount {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateCreated;
 
-    public BankAccount() {
+    BankAccount() {
     }
 
     public BankAccount(Integer accountNumber, AccountType accountType, Customer customer) {
