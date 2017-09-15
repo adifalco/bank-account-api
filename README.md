@@ -1,4 +1,4 @@
-# bank-account-api
+# Bank Account API
 
 ## Technology stack
 - Java 8
