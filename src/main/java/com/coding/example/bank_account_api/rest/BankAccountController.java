@@ -26,7 +26,7 @@ public class BankAccountController {
         this.bankAccountService = bankAccountService;
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_UTF8_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseStatus(value = HttpStatus.CREATED)
     public BankAccountDTO create(@Valid @RequestBody NewAccountRequestDTO newAccountRequestDTO) throws Exception {
         return bankAccountService.create(newAccountRequestDTO);

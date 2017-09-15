@@ -29,14 +29,16 @@ public class BankTransaction {
     public BankTransaction() {
     }
 
-    public BankTransaction(TransactionType transactionType, Double amount, Double updatedBalance) {
-        this(transactionType, amount, updatedBalance, null);
-    }
-
-    public BankTransaction(TransactionType transactionType, Double amount, Double updatedBalance, BankAccount bankAccount) {
+    public BankTransaction(TransactionType transactionType, Double amount) {
         this.transactionType = transactionType;
         this.amount = amount;
-        this.updatedBalance = updatedBalance;
+        this.transactionDate = new Date();
+    }
+
+    public BankTransaction(TransactionType transactionType, Double amount, BankAccount bankAccount) {
+        this.transactionType = transactionType;
+        this.amount = amount;
+        this.updatedBalance = bankAccount.getBalance();
         this.bankAccount = bankAccount;
         this.transactionDate = new Date();
     }
@@ -63,6 +65,7 @@ public class BankTransaction {
     }
 
     public void setBankAccount(BankAccount bankAccount) {
+        this.updatedBalance = bankAccount.getBalance();
         this.bankAccount = bankAccount;
     }
 

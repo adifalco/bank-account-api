@@ -46,7 +46,7 @@ public class BankTransactionRepositoryTest {
     public void savedBankTransaction_thenIsAccessibleFromBankAccount() {
         //Given
         BankAccount bankAccount = bankAccountRepository.findOne(ACCOUNT_ID);
-        BankTransaction newBankTransaction = new BankTransaction(TransactionType.DEPOSIT, AMOUNT, NEW_BALANCE, bankAccount);
+        BankTransaction newBankTransaction = new BankTransaction(TransactionType.DEPOSIT, AMOUNT, bankAccount);
 
         //When
         bankTransactionRepository.save(newBankTransaction);

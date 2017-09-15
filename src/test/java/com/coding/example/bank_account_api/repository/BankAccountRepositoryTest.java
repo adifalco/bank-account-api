@@ -70,7 +70,7 @@ public class BankAccountRepositoryTest {
     public void addNewTransactionToAccount() {
         //Given
         BankAccount bankAccount = bankAccountRepository.findOne(ACCOUNT_ID);
-        BankTransaction newBankTransaction = new BankTransaction(TransactionType.DEPOSIT, AMOUNT, NEW_BALANCE);
+        BankTransaction newBankTransaction = new BankTransaction(TransactionType.DEPOSIT, AMOUNT);
         bankAccount.addBankTransaction(newBankTransaction);
 
         //When

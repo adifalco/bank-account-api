@@ -53,10 +53,7 @@ public class DefaultBankAccountService implements BankAccountService {
         Preconditions.checkArgument(amount > 0, "Invalid amount");
 
         BankAccount bankAccount = findBankAcountChecked(accountNumber);
-        bankAccount.add(amount);
-        BankTransaction bankTransaction = new BankTransaction(TransactionType.DEPOSIT, amount, bankAccount.getBalance(), bankAccount);
-        bankTransactionRepository.save(bankTransaction);
-        return BankTransactionMapper.makeTransactionDTO(bankTransaction);
+        return addNewBankTransaction(TransactionType.DEPOSIT, amount, bankAccount);
     }
 
     @Override
@@ -66,9 +63,12 @@ public class DefaultBankAccountService implements BankAccountService {
 
         BankAccount bankAccount = findBankAcountChecked(accountNumber);
         checkEnoughFunds(bankAccount, amount);
-        amount *= -1;
+        return addNewBankTransaction(TransactionType.WITHDRAWAL, amount * -1, bankAccount);
+    }
+
+    private TransactionDTO addNewBankTransaction(TransactionType transactionType, Double amount, BankAccount bankAccount) {
         bankAccount.add(amount);
-        BankTransaction bankTransaction = new BankTransaction(TransactionType.WITHDRAWAL, amount, bankAccount.getBalance(), bankAccount);
+        BankTransaction bankTransaction = new BankTransaction(transactionType, amount, bankAccount);
         bankTransactionRepository.save(bankTransaction);
         return BankTransactionMapper.makeTransactionDTO(bankTransaction);
     }

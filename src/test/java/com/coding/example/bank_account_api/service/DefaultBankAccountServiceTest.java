@@ -76,7 +76,7 @@ public class DefaultBankAccountServiceTest {
     public void fundAccount_whenAllCorrect_returnsTransactionDTO() throws Exception {
         //Given
         BankAccount bankAccount = buildBankAccount(new Customer());
-        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT, BALANCE);
+        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT);
         bankAccount.add(DEPOSIT_TRANSACTION_AMOUNT);
         bankAccount.addBankTransaction(transaction);
         when(bankAccountRepository.findByAccountNumber(ACCOUNT_NUMBER)).thenReturn(bankAccount);
@@ -90,7 +90,7 @@ public class DefaultBankAccountServiceTest {
         assertEquals(BALANCE_AFTER_DEPOSIT, transactionDTO.getBalance());
         assertNotNull(transactionDTO.getTransactionDate());
 
-        BankTransaction expectedTransaction = new BankTransaction(TransactionType.DEPOSIT, NEW_TRANSACTION_AMOUNT, BALANCE_AFTER_DEPOSIT, bankAccount);
+        BankTransaction expectedTransaction = new BankTransaction(TransactionType.DEPOSIT, NEW_TRANSACTION_AMOUNT, bankAccount);
         verify(bankTransactionRepository, times(1)).save(argThat(new BankTransactionMatcher(expectedTransaction)));
     }
 
@@ -98,7 +98,7 @@ public class DefaultBankAccountServiceTest {
     public void withdraw_whenAllCorrect_returnsTransactionDTO() throws Exception {
         //Given
         BankAccount bankAccount = buildBankAccount(new Customer());
-        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT, BALANCE);
+        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT);
         bankAccount.add(DEPOSIT_TRANSACTION_AMOUNT);
         bankAccount.addBankTransaction(transaction);
         when(bankAccountRepository.findByAccountNumber(ACCOUNT_NUMBER)).thenReturn(bankAccount);
@@ -112,7 +112,7 @@ public class DefaultBankAccountServiceTest {
         assertEquals(BALANCE_AFTER_WITHDRAWAL, transactionDTO.getBalance());
         assertNotNull(transactionDTO.getTransactionDate());
 
-        BankTransaction expectedTransaction = new BankTransaction(TransactionType.WITHDRAWAL, NEW_TRANSACTION_AMOUNT * -1, BALANCE_AFTER_WITHDRAWAL, bankAccount);
+        BankTransaction expectedTransaction = new BankTransaction(TransactionType.WITHDRAWAL, NEW_TRANSACTION_AMOUNT * -1, bankAccount);
         verify(bankTransactionRepository, times(1)).save(argThat(new BankTransactionMatcher(expectedTransaction)));
     }
 

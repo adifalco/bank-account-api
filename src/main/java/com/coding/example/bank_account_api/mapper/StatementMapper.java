@@ -14,6 +14,7 @@ public class StatementMapper {
                 .setLastName(bankAccount.getCustomer().getLastName())
                 .setAccountNumber(bankAccount.getAccountNumber())
                 .setDate(new Date())
+                .setBalance(bankAccount.getBalance())
                 .setTransactions(bankAccount.getTransactions().stream().map(BankTransactionMapper::makeTransactionDTO).collect(Collectors.toList()))
                 .build();
     }
