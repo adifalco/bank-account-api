@@ -1,12 +1,16 @@
 package com.coding.example.bank_account_api.service;
 
 import com.coding.example.bank_account_api.domain.BankAccount;
+import com.coding.example.bank_account_api.domain.BankTransaction;
 import com.coding.example.bank_account_api.domain.Customer;
 import com.coding.example.bank_account_api.domainvalue.AccountType;
+import com.coding.example.bank_account_api.domainvalue.TransactionType;
 import com.coding.example.bank_account_api.dto.BankAccountDTO;
 import com.coding.example.bank_account_api.dto.NewAccountRequestDTO;
+import com.coding.example.bank_account_api.dto.TransactionDTO;
 import com.coding.example.bank_account_api.repository.BankAccountRepository;
 import com.coding.example.bank_account_api.repository.BankTransactionRepository;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -18,6 +22,7 @@ import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -28,6 +33,11 @@ public class DefaultBankAccountServiceTest {
     private static final Long ACCOUNT_ID = 2L;
     private static final Integer ACCOUNT_NUMBER = 12345678;
     private static final Double ZERO_AMOUNT = 0.00d;
+    private static final Double BALANCE = new Double(100.01);
+    private static final Double DEPOSIT_TRANSACTION_AMOUNT = new Double(100.01);
+    private static final Double NEW_TRANSACTION_AMOUNT = new Double(45.67);
+    private static final Double BALANCE_AFTER_DEPOSIT = new Double(145.68);
+    private static final Double BALANCE_AFTER_WITHDRAWAL = new Double(54.34);
 
     @Mock
     private BankTransactionRepository bankTransactionRepository;
@@ -62,6 +72,50 @@ public class DefaultBankAccountServiceTest {
         verify(bankAccountRepository, times(1)).save(argThat(new BankAccountMatcher(newBankAccount)));
     }
 
+    @Test
+    public void fundAccount_whenAllCorrect_returnsTransactionDTO() throws Exception {
+        //Given
+        BankAccount bankAccount = buildBankAccount(new Customer());
+        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT, BALANCE);
+        bankAccount.add(DEPOSIT_TRANSACTION_AMOUNT);
+        bankAccount.addBankTransaction(transaction);
+        when(bankAccountRepository.findByAccountNumber(ACCOUNT_NUMBER)).thenReturn(bankAccount);
+
+        //When
+        TransactionDTO transactionDTO = bankAccountService.fundAccount(ACCOUNT_NUMBER, NEW_TRANSACTION_AMOUNT);
+
+        //Then
+        assertEquals(ACCOUNT_NUMBER, transactionDTO.getAccountNumber());
+        assertEquals(TransactionType.DEPOSIT, transactionDTO.getTransactionType());
+        assertEquals(BALANCE_AFTER_DEPOSIT, transactionDTO.getBalance());
+        assertNotNull(transactionDTO.getTransactionDate());
+
+        BankTransaction expectedTransaction = new BankTransaction(TransactionType.DEPOSIT, NEW_TRANSACTION_AMOUNT, BALANCE_AFTER_DEPOSIT, bankAccount);
+        verify(bankTransactionRepository, times(1)).save(argThat(new BankTransactionMatcher(expectedTransaction)));
+    }
+
+    @Test
+    public void withdraw_whenAllCorrect_returnsTransactionDTO() throws Exception {
+        //Given
+        BankAccount bankAccount = buildBankAccount(new Customer());
+        BankTransaction transaction = new BankTransaction(TransactionType.DEPOSIT, DEPOSIT_TRANSACTION_AMOUNT, BALANCE);
+        bankAccount.add(DEPOSIT_TRANSACTION_AMOUNT);
+        bankAccount.addBankTransaction(transaction);
+        when(bankAccountRepository.findByAccountNumber(ACCOUNT_NUMBER)).thenReturn(bankAccount);
+
+        //When
+        TransactionDTO transactionDTO = bankAccountService.withdraw(ACCOUNT_NUMBER, NEW_TRANSACTION_AMOUNT);
+
+        //Then
+        assertEquals(ACCOUNT_NUMBER, transactionDTO.getAccountNumber());
+        assertEquals(TransactionType.WITHDRAWAL, transactionDTO.getTransactionType());
+        assertEquals(BALANCE_AFTER_WITHDRAWAL, transactionDTO.getBalance());
+        assertNotNull(transactionDTO.getTransactionDate());
+
+        BankTransaction expectedTransaction = new BankTransaction(TransactionType.WITHDRAWAL, NEW_TRANSACTION_AMOUNT * -1, BALANCE_AFTER_WITHDRAWAL, bankAccount);
+        verify(bankTransactionRepository, times(1)).save(argThat(new BankTransactionMatcher(expectedTransaction)));
+    }
+
     private Answer buildBankAccountSavingAnswer() {
         return new Answer() {
             @Override
@@ -84,6 +138,24 @@ public class DefaultBankAccountServiceTest {
 
     private BankAccount buildBankAccount(Customer customer) {
         return new BankAccount(ACCOUNT_NUMBER, AccountType.CURRENT_ACCOUNT, customer);
+    }
+
+    private class BankTransactionMatcher extends ArgumentMatcher<BankTransaction> {
+
+        private BankTransaction expected;
+
+        public BankTransactionMatcher(BankTransaction expected) {
+            this.expected = expected;
+        }
+
+        @Override
+        public boolean matches(Object o) {
+            if (o instanceof BankTransaction) {
+                BankTransaction actual = (BankTransaction) o;
+                return EqualsBuilder.reflectionEquals(expected, actual, "transactionDate");
+            }
+            return false;
+        }
     }
 
     private class BankAccountMatcher extends ArgumentMatcher<BankAccount> {

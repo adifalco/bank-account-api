@@ -3,6 +3,7 @@ package com.coding.example.bank_account_api.domain;
 import com.coding.example.bank_account_api.domainvalue.AccountType;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,6 +57,13 @@ public class BankAccount {
 
     public Double getBalance() {
         return balance;
+    }
+
+    public void add(Double amount) {
+        BigDecimal bigBalance = new BigDecimal(this.balance).setScale(2, BigDecimal.ROUND_HALF_DOWN);
+        BigDecimal bigAmont = new BigDecimal(amount).setScale(2, BigDecimal.ROUND_HALF_DOWN);
+        bigBalance = bigBalance.add(bigAmont);
+        this.balance = Double.valueOf(bigBalance.doubleValue());
     }
 
     public Customer getCustomer() {

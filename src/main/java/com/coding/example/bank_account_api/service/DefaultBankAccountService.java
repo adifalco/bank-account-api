@@ -1,7 +1,9 @@
 package com.coding.example.bank_account_api.service;
 
 import com.coding.example.bank_account_api.domain.BankAccount;
+import com.coding.example.bank_account_api.domain.BankTransaction;
 import com.coding.example.bank_account_api.domain.Customer;
+import com.coding.example.bank_account_api.domainvalue.TransactionType;
 import com.coding.example.bank_account_api.dto.BankAccountDTO;
 import com.coding.example.bank_account_api.dto.NewAccountRequestDTO;
 import com.coding.example.bank_account_api.dto.StatementDTO;
@@ -9,9 +11,12 @@ import com.coding.example.bank_account_api.dto.TransactionDTO;
 import com.coding.example.bank_account_api.exceptions.EntityNotFoundException;
 import com.coding.example.bank_account_api.exceptions.NotEnoughFundsException;
 import com.coding.example.bank_account_api.mapper.BankAccountMapper;
+import com.coding.example.bank_account_api.mapper.BankTransactionMapper;
+import com.coding.example.bank_account_api.mapper.StatementMapper;
 import com.coding.example.bank_account_api.repository.BankAccountRepository;
 import com.coding.example.bank_account_api.repository.BankTransactionRepository;
 import com.coding.example.bank_account_api.util.BankUtils;
+import com.google.common.base.Preconditions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,16 +49,48 @@ public class DefaultBankAccountService implements BankAccountService {
 
     @Override
     public TransactionDTO fundAccount(Integer accountNumber, Double amount) throws EntityNotFoundException {
-        return null;
+        Preconditions.checkNotNull(amount, "Amount cannot be null");
+        Preconditions.checkArgument(amount > 0, "Invalid amount");
+
+        BankAccount bankAccount = findBankAcountChecked(accountNumber);
+        bankAccount.add(amount);
+        BankTransaction bankTransaction = new BankTransaction(TransactionType.DEPOSIT, amount, bankAccount.getBalance(), bankAccount);
+        bankTransactionRepository.save(bankTransaction);
+        return BankTransactionMapper.makeTransactionDTO(bankTransaction);
     }
 
     @Override
     public TransactionDTO withdraw(Integer accountNumber, Double amount) throws EntityNotFoundException, NotEnoughFundsException {
-        return null;
+        Preconditions.checkNotNull(amount, "Amount cannot be null");
+        Preconditions.checkArgument(amount > 0, "Invalid amount");
+
+        BankAccount bankAccount = findBankAcountChecked(accountNumber);
+        checkEnoughFunds(bankAccount, amount);
+        amount *= -1;
+        bankAccount.add(amount);
+        BankTransaction bankTransaction = new BankTransaction(TransactionType.WITHDRAWAL, amount, bankAccount.getBalance(), bankAccount);
+        bankTransactionRepository.save(bankTransaction);
+        return BankTransactionMapper.makeTransactionDTO(bankTransaction);
+    }
+
+    private void checkEnoughFunds(BankAccount bankAccount, Double amountToWithdraw) throws NotEnoughFundsException {
+        if (amountToWithdraw.compareTo(bankAccount.getBalance()) > 0) {
+            throw new NotEnoughFundsException("Not enough funds to witheraw this amount of money");
+        }
     }
 
     @Override
     public StatementDTO getStatement(Integer accountNumber) throws EntityNotFoundException {
-        return null;
+        BankAccount bankAccount = findBankAcountChecked(accountNumber);
+        return StatementMapper.makeStatementDTO(bankAccount);
     }
+
+    private BankAccount findBankAcountChecked(Integer accountNumber) throws EntityNotFoundException {
+        BankAccount bankAccount = bankAccountRepository.findByAccountNumber(accountNumber);
+        if (bankAccount == null) {
+            throw new EntityNotFoundException("Account number not found: " + accountNumber);
+        }
+        return bankAccount;
+    }
+
 }
