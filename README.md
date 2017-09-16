@@ -13,9 +13,9 @@ The account number is a number of 8 digits
 
 ## Notes
 
-This does not pretent to be production-code like, but it's a simplified version of how it could be a Bank Account API, as there are lots of stuff to add or make differently::
+This does not pretent to be production-code like, but it's a simplified version of how it could be a Bank Account API, as there are lot of stuff to add or make differently:
 
-- Security is missing. It's necessary to add security to prevent anyone from hiting the entry points, and an extra security to prevent withdrawals from people that are not owners of the account.
+- Security is missing. It's necessary to add security to prevent anyone from hitting the entry points, and an extra security to prevent withdrawals from people that are not owners of the account.
 - The entry point to get the statement should receive a range of dates.
 - Some unit tests are missing.
 
